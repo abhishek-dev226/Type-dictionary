@@ -28,30 +28,40 @@
 </div>
 
 <script>
-    // This is a small sample. Later, we will connect thousands of words here.
-    const dictionary = {
-        "apple": { "eng": "A round red or green fruit.", "hindi": "सेब" },
-        "resilient": { "eng": "Able to withstand or recover quickly from difficult conditions.", "hindi": "लचीला" },
-        "honest": { "eng": "Telling the truth and not hiding things.", "hindi": "ईमानदार" }
-    };
+    let dictionary = {};
 
-    function searchWord() {
-        let word = document.getElementById("searchBox").value.toLowerCase();
-        let display = document.getElementById("result");
-        
-        if (dictionary[word]) {
-            display.innerHTML = `
-                <div class="word-title">${word}</div>
-                <div class="eng-def"><strong>English:</strong> ${dictionary[word].eng}</div>
-                <div class="hindi-def"><strong>Hindi:</strong> ${dictionary[word].hindi}</div>
-            `;
-        } else if (word === "") {
-            display.innerHTML = '<p style="color: #999;">Search results will appear here...</p>';
-        } else {
-            display.innerHTML = '<p style="color: #999;">Word not found in our sample yet.</p>';
-        }
+// This function goes to the "filing cabinet" (data.json) and gets the words
+async function loadDictionary() {
+    try {
+        const response = await fetch('data.json');
+        dictionary = await response.json();
+        console.log("Dictionary Loaded Successfully");
+    } catch (error) {
+        console.error("Error loading data:", error);
     }
+}
+
+function searchWord() {
+    let word = document.getElementById("searchBox").value.toLowerCase().trim();
+    let display = document.getElementById("result");
+    
+    if (dictionary[word]) {
+        display.innerHTML = `
+            <div class="word-title">${word}</div>
+            <div class="eng-def"><strong>English:</strong> ${dictionary[word].e}</div>
+            <div class="hindi-def"><strong>Hindi:</strong> ${dictionary[word].h}</div>
+        `;
+    } else if (word === "") {
+        display.innerHTML = '<p style="color: #999;">Search results will appear here...</p>';
+    } else {
+        display.innerHTML = '<p style="color: #999;">Word not found. Check spelling or try another.</p>';
+    }
+}
+
+// Start loading the data as soon as the page opens
+loadDictionary();
 </script>
 
 </body>
+
 </html>
