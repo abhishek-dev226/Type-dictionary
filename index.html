@@ -3,105 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abhishek's Premium Dict</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>LexicoGraph Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #4f46e5; --bg: #f3f4f6; --text: #111827; --card: #ffffff; }
-        .dark-theme { --bg: #0f172a; --text: #f9fafb; --card: #1e293b; --main: #818cf8; }
+        :root {
+            --bg: #f8fafc; --card: rgba(255, 255, 255, 0.8); --text: #0f172a;
+            --accent: #6366f1; --sub: #64748b; --glass: rgba(255, 255, 255, 0.4);
+        }
+        .dark-theme {
+            --bg: #020617; --card: rgba(15, 23, 42, 0.8); --text: #f8fafc;
+            --accent: #818cf8; --sub: #94a3b8; --glass: rgba(15, 23, 42, 0.4);
+        }
 
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.4s; display: flex; flex-direction: column; align-items: center; }
-        .nav { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        
-        .search-container { width: 100%; max-width: 600px; position: sticky; top: 10px; z-index: 100; }
-        input { width: 100%; padding: 18px 25px; border-radius: 15px; border: none; background: var(--card); color: var(--text); font-size: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; transition: 0.3s; box-sizing: border-box; }
-        input:focus { box-shadow: 0 0 0 3px var(--main); }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg); color: var(--text);
+            margin: 0; padding: 20px; transition: 0.5s;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+        }
 
-        .result-card { width: 100%; max-width: 600px; background: var(--card); margin-top: 25px; padding: 30px; border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); display: none; }
-        
-        .word-title { font-size: 36px; font-weight: 800; color: var(--main); margin: 0; display: flex; justify-content: space-between; align-items: center; }
-        .speaker-btn { background: var(--main); color: white; border: none; padding: 10px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+        /* Premium Nav */
+        .nav {
+            width: 100%; max-width: 500px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 40px; backdrop-filter: blur(10px);
+        }
 
-        .badge { background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
-        .meaning-text { font-size: 24px; font-weight: 600; color: #dc2626; margin-bottom: 20px; }
+        .logo { font-size: 24px; font-weight: 800; letter-spacing: -1px; }
+        .logo span { color: var(--accent); }
+
+        /* Dark/Light Toggle */
+        .theme-btn {
+            background: var(--card); border: 1px solid var(--glass);
+            width: 45px; height: 45px; border-radius: 12px;
+            cursor: pointer; font-size: 20px; display: flex;
+            align-items: center; justify-content: center; transition: 0.3s;
+        }
+
+        /* Search Bar */
+        .search-box {
+            width: 100%; max-width: 500px; position: sticky; top: 20px; z-index: 100;
+        }
+        input {
+            width: 100%; padding: 20px 25px; border-radius: 20px;
+            border: 1px solid var(--glass); background: var(--card);
+            color: var(--text); font-size: 18px; backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); outline: none;
+            transition: 0.3s; box-sizing: border-box;
+        }
+        input:focus { border-color: var(--accent); transform: scale(1.02); }
+
+        /* Result Card */
+        .result-container {
+            width: 100%; max-width: 500px; margin-top: 30px;
+            display: none; animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .main-card {
+            background: var(--card); padding: 30px; border-radius: 30px;
+            border: 1px solid var(--glass); backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        .word-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .word-text { font-size: 38px; font-weight: 800; text-transform: capitalize; }
         
-        .detail-section { border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 20px; }
-        .detail-label { font-size: 13px; font-weight: 700; color: var(--main); text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .eng-def { font-size: 16px; line-height: 1.6; color: var(--text); opacity: 0.8; }
-        .example-box { font-style: italic; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 14px; }
-        
-        .theme-toggle { background: var(--card); border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .speaker {
+            background: var(--accent); color: white; border: none;
+            width: 50px; height: 50px; border-radius: 15px;
+            cursor: pointer; font-size: 20px; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .section { margin-top: 25px; }
+        .label {
+            font-size: 11px; font-weight: 700; color: var(--accent);
+            text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block;
+        }
+
+        .hindi-meaning {
+            font-size: 26px; font-weight: 700; color: #ef4444; /* Premium Red */
+            line-height: 1.4;
+        }
+
+        .eng-def { font-size: 16px; line-height: 1.6; opacity: 0.9; }
+        .example {
+            font-style: italic; color: var(--sub); margin-top: 10px;
+            padding-left: 15px; border-left: 3px solid var(--accent);
+        }
+
+        .loader {
+            display: none; margin-top: 20px; font-weight: 600; color: var(--accent);
+        }
     </style>
 </head>
-<body onload="init()">
+<body onload="checkTheme()">
 
     <div class="nav">
-        <h2 style="margin:0; font-weight:800;">Lexi<span style="color:var(--main);">Hub</span></h2>
-        <button class="theme-toggle" onclick="toggleTheme()" id="tBtn">🌙</button>
+        <div class="logo">Lexico<span>Graph</span></div>
+        <button class="theme-btn" onclick="toggleTheme()" id="tBtn">🌙</button>
     </div>
 
-    <div class="search-container">
-        <input type="text" id="sBox" placeholder="Type a word..." oninput="search()">
+    <div class="search-box">
+        <input type="text" id="sInput" placeholder="Enter word..." onkeypress="handleEnter(event)">
+        <div id="loading" class="loader">Searching across APIs...</div>
     </div>
 
-    <div id="resCard" class="result-card">
-        <div class="word-title" id="wName">Word <button class="speaker-btn" onclick="say()">🔊</button></div>
-        
-        <div class="detail-section">
-            <span class="badge">HINDI MEANING</span>
-            <div id="hMean" class="meaning-text">Loading...</div>
-        </div>
+    <div id="resultArea" class="result-container">
+        <div class="main-card">
+            <div class="word-row">
+                <div class="word-text" id="targetWord">Word</div>
+                <button class="speaker" onclick="speak()">🔊</button>
+            </div>
 
-        <div id="apiDetails">
-            <div class="detail-section">
-                <span class="detail-label">Definition & Examples</span>
-                <div id="eDef" class="eng-def">Checking internet for details...</div>
+            <div class="section">
+                <span class="label">Hindi Meaning</span>
+                <div id="hText" class="hindi-meaning">Translating...</div>
+            </div>
+
+            <div class="section">
+                <span class="label">Definition & Example</span>
+                <div id="eDef" class="eng-def">Loading...</div>
+                <div id="eEx" class="example"></div>
             </div>
         </div>
     </div>
 
 <script>
-    let dictData = {};
-
-    function init() {
-        Papa.parse("English-Hindi Dictionary.csv", {
-            download: true, header: true,
-            complete: (r) => { r.data.forEach(x => { if(x.eword) dictData[x.eword.toLowerCase().trim()] = x.hword; }); }
-        });
-        if(localStorage.getItem('dark') === 'true') toggleTheme();
+    // Search only when user presses Enter to save API calls
+    async function handleEnter(e) {
+        if (e.key === 'Enter') {
+            const word = document.getElementById('sInput').value.trim();
+            if (word) searchPro(word);
+        }
     }
 
-    async function search() {
-        let val = document.getElementById('sBox').value.toLowerCase().trim();
-        let card = document.getElementById('resCard');
-        if(!val) { card.style.display = 'none'; return; }
+    async function searchPro(word) {
+        const resultArea = document.getElementById('resultArea');
+        const loader = document.getElementById('loading');
         
-        card.style.display = 'block';
-        document.getElementById('wName').firstChild.textContent = val;
-        document.getElementById('hMean').innerText = dictData[val] || "N/A (Update CSV for accuracy)";
+        loader.style.display = 'block';
+        resultArea.style.display = 'none';
 
-        // Fetch API Data
         try {
-            let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${val}`);
-            let data = await res.json();
-            if(data[0]) {
-                let m = data[0].meanings[0];
-                document.getElementById('eDef').innerHTML = `
-                    <b>(${m.partOfSpeech})</b>: ${m.definitions[0].definition}
-                    <div class="example-box">"${m.definitions[0].example || 'No example available'}"</div>
-                    <div style="margin-top:10px"><b>Synonyms:</b> ${m.synonyms.slice(0,3).join(', ') || 'None'}</div>
-                `;
+            // 1. English Data (Dictionary API)
+            const engRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+            const engData = await engRes.json();
+
+            // 2. Hindi Data (MyMemory API - Accurate & Free)
+            const hinRes = await fetch(`https://api.mymemory.translated.net/get?q=${word}&langpair=en|hi`);
+            const hinData = await hinRes.json();
+
+            document.getElementById('targetWord').innerText = word;
+            
+            // Setting Hindi Meaning
+            document.getElementById('hText').innerText = hinData.responseData.translatedText;
+
+            // Setting English Meaning
+            if (engData[0]) {
+                const mean = engData[0].meanings[0];
+                document.getElementById('eDef').innerHTML = `<b>[${mean.partOfSpeech}]</b> ${mean.definitions[0].definition}`;
+                document.getElementById('eEx').innerText = mean.definitions[0].example ? `"${mean.definitions[0].example}"` : "";
+            } else {
+                document.getElementById('eDef').innerText = "English definition not found.";
+                document.getElementById('eEx').innerText = "";
             }
-        } catch(e) { document.getElementById('eDef').innerText = "Details offline mode mein available nahi hain."; }
+
+            loader.style.display = 'none';
+            resultArea.style.display = 'block';
+
+        } catch (error) {
+            alert("Please check your internet connection.");
+            loader.style.display = 'none';
+        }
     }
 
-    function say() { window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('sBox').value)); }
-    
+    function speak() {
+        const word = document.getElementById('targetWord').innerText;
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(word));
+    }
+
     function toggleTheme() {
         document.body.classList.toggle('dark-theme');
-        let isDark = document.body.classList.contains('dark-theme');
-        localStorage.setItem('dark', isDark);
+        const isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
         document.getElementById('tBtn').innerText = isDark ? "☀️" : "🌙";
+    }
+
+    function checkTheme() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+            document.getElementById('tBtn').innerText = "☀️";
+        }
     }
 </script>
 </body>
