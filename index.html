@@ -3,126 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abhishek's Master Dictionary</title>
+    <title>Abhishek's Premium Dict</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --secondary: #94a3b8; }
-        .dark-theme { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --secondary: #64748b; }
+        :root { --main: #4f46e5; --bg: #f3f4f6; --text: #111827; --card: #ffffff; }
+        .dark-theme { --bg: #0f172a; --text: #f9fafb; --card: #1e293b; --main: #818cf8; }
+
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.4s; display: flex; flex-direction: column; align-items: center; }
+        .nav { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 600px; width: 100%; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 20px; }
+        .search-container { width: 100%; max-width: 600px; position: sticky; top: 10px; z-index: 100; }
+        input { width: 100%; padding: 18px 25px; border-radius: 15px; border: none; background: var(--card); color: var(--text); font-size: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; transition: 0.3s; box-sizing: border-box; }
+        input:focus { box-shadow: 0 0 0 3px var(--main); }
+
+        .result-card { width: 100%; max-width: 600px; background: var(--card); margin-top: 25px; padding: 30px; border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); display: none; }
         
-        .header { display: flex; justify-content: space-between; width: 100%; max-width: 600px; align-items: center; }
-        .theme-btn { border: none; background: var(--card); padding: 10px; border-radius: 50%; cursor: pointer; font-size: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .word-title { font-size: 36px; font-weight: 800; color: var(--main); margin: 0; display: flex; justify-content: space-between; align-items: center; }
+        .speaker-btn { background: var(--main); color: white; border: none; padding: 10px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+
+        .badge { background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+        .meaning-text { font-size: 24px; font-weight: 600; color: #dc2626; margin-bottom: 20px; }
         
-        input { width: 100%; padding: 15px; border: 2px solid var(--secondary); border-radius: 12px; font-size: 18px; outline: none; box-sizing: border-box; background: var(--card); color: var(--text); }
-        input:focus { border-color: var(--primary); }
+        .detail-section { border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 20px; }
+        .detail-label { font-size: 13px; font-weight: 700; color: var(--main); text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .eng-def { font-size: 16px; line-height: 1.6; color: var(--text); opacity: 0.8; }
+        .example-box { font-style: italic; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 14px; }
         
-        .result-box { margin-top: 25px; text-align: left; }
-        .word-head { font-size: 32px; font-weight: 800; color: var(--primary); display: flex; justify-content: space-between; align-items: center; }
-        .pos { font-size: 14px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
-        
-        .section { margin-bottom: 20px; padding: 15px; border-radius: 12px; background: rgba(99, 102, 241, 0.05); }
-        .label { font-size: 12px; font-weight: bold; color: var(--primary); margin-bottom: 5px; display: block; }
-        .meaning { font-size: 20px; font-weight: 600; color: #ef4444; } /* Hindi Meaning in Red */
-        .example { font-style: italic; color: var(--secondary); font-size: 15px; }
-        
-        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
-        .chip { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
-        
-        .speaker { cursor: pointer; font-size: 24px; transition: transform 0.2s; }
-        .speaker:active { transform: scale(0.9); }
+        .theme-toggle { background: var(--card); border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body>
+<body onload="init()">
 
-<div class="header">
-    <h2 style="margin:0;">WordFinder Pro</h2>
-    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-</div>
+    <div class="nav">
+        <h2 style="margin:0; font-weight:800;">Lexi<span style="color:var(--main);">Hub</span></h2>
+        <button class="theme-toggle" onclick="toggleTheme()" id="tBtn">🌙</button>
+    </div>
 
-<div class="container">
-    <input type="text" id="searchBox" placeholder="Yahan word search karein..." onkeyup="handleSearch(event)">
-    <p id="status" style="font-size: 12px; color: var(--secondary); margin-top: 10px;">CSV Loading...</p>
-    
-    <div id="result" class="result-box"></div>
-</div>
+    <div class="search-container">
+        <input type="text" id="sBox" placeholder="Type a word..." oninput="search()">
+    </div>
+
+    <div id="resCard" class="result-card">
+        <div class="word-title" id="wName">Word <button class="speaker-btn" onclick="say()">🔊</button></div>
+        
+        <div class="detail-section">
+            <span class="badge">HINDI MEANING</span>
+            <div id="hMean" class="meaning-text">Loading...</div>
+        </div>
+
+        <div id="apiDetails">
+            <div class="detail-section">
+                <span class="detail-label">Definition & Examples</span>
+                <div id="eDef" class="eng-def">Checking internet for details...</div>
+            </div>
+        </div>
+    </div>
 
 <script>
-    let csvData = {};
+    let dictData = {};
 
-    // 1. Load your CSV file
-    function loadCSV() {
+    function init() {
         Papa.parse("English-Hindi Dictionary.csv", {
-            download: true,
-            header: true,
-            complete: function(results) {
-                results.data.forEach(row => {
-                    if(row.eword) csvData[row.eword.toLowerCase().trim()] = row.hword;
-                });
-                document.getElementById("status").innerText = "✅ 1.7 Lakh Words Loaded Offline";
-            }
+            download: true, header: true,
+            complete: (r) => { r.data.forEach(x => { if(x.eword) dictData[x.eword.toLowerCase().trim()] = x.hword; }); }
         });
+        if(localStorage.getItem('dark') === 'true') toggleTheme();
     }
 
-    // 2. Main Search Function
-    async function handleSearch(e) {
-        let word = document.getElementById("searchBox").value.toLowerCase().trim();
-        let display = document.getElementById("result");
-        if (!word) { display.innerHTML = ""; return; }
-
-        let hindiMeaning = csvData[word] || "Hindi meaning available nahi hai";
+    async function search() {
+        let val = document.getElementById('sBox').value.toLowerCase().trim();
+        let card = document.getElementById('resCard');
+        if(!val) { card.style.display = 'none'; return; }
         
-        // UI with basic info from CSV
-        display.innerHTML = `
-            <div class="word-head">
-                ${word} <span class="speaker" onclick="speak('${word}')">🔊</span>
-            </div>
-            <div class="section">
-                <span class="label">HINDI MEANING</span>
-                <div class="meaning">${hindiMeaning}</div>
-            </div>
-            <div id="apiData">Loading extra details (Synonyms, Examples)...</div>
-        `;
+        card.style.display = 'block';
+        document.getElementById('wName').firstChild.textContent = val;
+        document.getElementById('hMean').innerText = dictData[val] || "N/A (Update CSV for accuracy)";
 
-        // 3. Fetch extra details from API (Synonyms, Examples, Antonyms)
+        // Fetch API Data
         try {
-            let response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-            let data = await response.json();
-            
-            if (data[0]) {
-                let meaning = data[0].meanings[0];
-                let apiHtml = `
-                    <div class="pos">${meaning.partOfSpeech}</div>
-                    <div class="section">
-                        <span class="label">ENGLISH DEFINITION</span>
-                        <div>${meaning.definitions[0].definition}</div>
-                        <p class="example">"${meaning.definitions[0].example || ''}"</p>
-                    </div>
-                    <div class="section">
-                        <span class="label">SYNONYMS</span>
-                        <div class="chip-container">
-                            ${meaning.synonyms.slice(0, 5).map(s => `<span class="chip">${s}</span>`).join('') || 'None'}
-                        </div>
-                    </div>
+            let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${val}`);
+            let data = await res.json();
+            if(data[0]) {
+                let m = data[0].meanings[0];
+                document.getElementById('eDef').innerHTML = `
+                    <b>(${m.partOfSpeech})</b>: ${m.definitions[0].definition}
+                    <div class="example-box">"${m.definitions[0].example || 'No example available'}"</div>
+                    <div style="margin-top:10px"><b>Synonyms:</b> ${m.synonyms.slice(0,3).join(', ') || 'None'}</div>
                 `;
-                document.getElementById("apiData").innerHTML = apiHtml;
             }
-        } catch (err) {
-            document.getElementById("apiData").innerHTML = "<p style='color:orange;'>Connect to internet for Synonyms & Examples</p>";
-        }
+        } catch(e) { document.getElementById('eDef').innerText = "Details offline mode mein available nahi hain."; }
     }
 
-    function speak(word) {
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(word));
-    }
-
+    function say() { window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('sBox').value)); }
+    
     function toggleTheme() {
-        document.body.classList.toggle("dark-theme");
-        document.getElementById("themeBtn").innerText = document.body.classList.contains("dark-theme") ? "☀️" : "🌙";
+        document.body.classList.toggle('dark-theme');
+        let isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('dark', isDark);
+        document.getElementById('tBtn').innerText = isDark ? "☀️" : "🌙";
     }
-
-    window.onload = loadCSV;
 </script>
 </body>
 </html>
