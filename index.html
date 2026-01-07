@@ -10,33 +10,18 @@
         .dark-theme { --bg: #020617; --card: #0f172a; --text: #f8fafc; --accent: #818cf8; --sub: #94a3b8; --border: #1e293b; }
         
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); transition: 0.5s; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        
         .nav { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .logo { font-size: 24px; font-weight: 800; } .logo span { color: var(--accent); }
         .theme-btn { background: var(--card); border: 1px solid var(--border); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; font-size: 20px; color: var(--text); }
         
-        /* Minimalist Word of the Day (No Color) */
-        .wotd-card { 
-            width: 100%; max-width: 500px; 
-            background: var(--card); 
-            color: var(--text); 
-            padding: 20px; 
-            border-radius: 20px; 
-            margin-bottom: 25px; 
-            border: 1.5px solid var(--border);
-            box-sizing: border-box; 
-        }
+        /* Minimalist Word of the Day */
+        .wotd-card { width: 100%; max-width: 500px; background: var(--card); color: var(--text); padding: 20px; border-radius: 20px; margin-bottom: 25px; border: 1.5px solid var(--border); box-sizing: border-box; }
         .wotd-tag { color: var(--accent); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .wotd-word { font-size: 28px; font-weight: 800; margin: 5px 0; text-transform: capitalize; }
-        .wotd-hindi { font-size: 18px; font-weight: 600; color: #ef4444; margin-bottom: 5px; }
+        .wotd-hindi { font-size: 18px; font-weight: 600; color: #ef4444; }
 
         .search-box { width: 100%; max-width: 500px; position: sticky; top: 15px; z-index: 100; }
-        input { 
-            width: 100%; padding: 18px 25px; border-radius: 20px; 
-            border: 1.5px solid var(--border); background: var(--card); 
-            color: var(--text); font-size: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
-            outline: none; box-sizing: border-box; transition: 0.3s;
-        }
+        input { width: 100%; padding: 18px 25px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); outline: none; box-sizing: border-box; transition: 0.3s; }
         input:focus { border-color: var(--accent); }
         
         .result-container { width: 100%; max-width: 500px; margin-top: 25px; display: none; }
@@ -59,9 +44,7 @@
     </div>
 
     <div class="search-box">
-        <input type="text" id="sInput" placeholder="Press Enter to search..." 
-               onkeypress="handleEnter(event)" 
-               oninput="checkEmpty()">
+        <input type="text" id="sInput" placeholder="Type a word & press Enter..." onkeypress="handleEnter(event)" oninput="checkEmpty()">
     </div>
 
     <div id="resultArea" class="result-container">
@@ -82,34 +65,65 @@
     </div>
 
 <script>
-    // ... (baaki ka purana code wahi rahega)
+    const wordsList = ["Resilient", "Eloquent", "Grateful", "Tenacious", "Vibrant", "Compassion", "Abundant"];
 
-    async function getHindiMeaning(word) {
-        try {
-            // Hum ab multi-source approach use kar rahe hain
-            // Pehle hum 'Google Translate' ke mirror se try karenge jo zyada accurate hai
-            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${encodeURI(word)}`);
-            const data = await res.json();
-            
-            if (data && data[0] && data[0][0][0]) {
-                let translation = data[0][0][0];
-                
-                // Agar translation abhi bhi wahi word hai, toh hum MyMemory par fallback karenge
-                if (translation.toLowerCase() === word.toLowerCase()) {
-                    const fallbackRes = await fetch(`https://api.mymemory.translated.net/get?q=${word}&langpair=en|hi`);
-                    const fallbackData = await fallbackRes.json();
-                    return fallbackData.responseData.translatedText;
-                }
-                return translation;
-            }
-            return "Meaning not found";
-        } catch (e) {
-            console.error("Translation Error:", e);
-            return "Offline / Error";
+    async function initApp() {
+        if (localStorage.getItem('theme') === 'dark') toggleTheme();
+        loadWordOfTheDay();
+    }
+
+    function checkEmpty() {
+        if (document.getElementById('sInput').value === "") {
+            document.getElementById('resultArea').style.display = 'none';
         }
     }
 
-    // ... (handleEnter aur baaki functions wahi rahenge)
+    async function loadWordOfTheDay() {
+        const word = wordsList[new Date().getDate() % wordsList.length];
+        const hText = await getHindiMeaning(word);
+        document.getElementById('dailyWord').innerText = word;
+        document.getElementById('dailyHindi').innerText = hText;
+    }
+
+    async function handleEnter(e) {
+        if (e.key === 'Enter') {
+            const word = document.getElementById('sInput').value.trim();
+            if (word) {
+                document.getElementById('resultArea').style.display = 'block';
+                document.getElementById('targetWord').innerText = word;
+                document.getElementById('hText').innerText = "Translating...";
+                
+                const hText = await getHindiMeaning(word);
+                document.getElementById('hText').innerText = hText;
+
+                const eRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                const eData = await eRes.json();
+                document.getElementById('eDef').innerText = eData[0] ? eData[0].meanings[0].definitions[0].definition : "Not found";
+            }
+        }
+    }
+
+    async function getHindiMeaning(word) {
+        try {
+            // Google Translate Mirror for High Accuracy
+            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${encodeURI(word)}`);
+            const data = await res.json();
+            return data[0][0][0];
+        } catch (e) {
+            return "Translation Error";
+        }
+    }
+
+    function speak() {
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('targetWord').innerText));
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('tBtn').innerText = isDark ? "☀️" : "🌙";
+    }
 </script>
 </body>
 </html>
