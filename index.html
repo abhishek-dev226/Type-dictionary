@@ -8,45 +8,36 @@
     <style>
         :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --accent: #6366f1; --sub: #64748b; --border: #e2e8f0; }
         .dark-theme { --bg: #020617; --card: #0f172a; --text: #f8fafc; --accent: #818cf8; --sub: #94a3b8; --border: #1e293b; }
-        
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); transition: 0.5s; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .nav { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .logo { font-size: 24px; font-weight: 800; } .logo span { color: var(--accent); }
         .theme-btn { background: var(--card); border: 1px solid var(--border); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; font-size: 20px; color: var(--text); }
-        
-        /* Minimalist Word of the Day */
         .wotd-card { width: 100%; max-width: 500px; background: var(--card); color: var(--text); padding: 20px; border-radius: 20px; margin-bottom: 25px; border: 1.5px solid var(--border); box-sizing: border-box; }
         .wotd-tag { color: var(--accent); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .wotd-word { font-size: 28px; font-weight: 800; margin: 5px 0; text-transform: capitalize; }
         .wotd-hindi { font-size: 18px; font-weight: 600; color: #ef4444; }
-
         .search-box { width: 100%; max-width: 500px; position: sticky; top: 15px; z-index: 100; }
         input { width: 100%; padding: 18px 25px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); outline: none; box-sizing: border-box; transition: 0.3s; }
         input:focus { border-color: var(--accent); }
-        
         .result-container { width: 100%; max-width: 500px; margin-top: 25px; display: none; }
         .main-card { background: var(--card); padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1.5px solid var(--border); }
-        .hindi-meaning { font-size: 26px; font-weight: 700; color: #ef4444; margin: 10px 0; }
+        .hindi-meaning { font-size: 24px; font-weight: 700; color: #ef4444; margin: 10px 0; line-height: 1.4; }
         .label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body onload="initApp()">
-
     <div class="nav">
         <div class="logo">Lexico<span>Graph</span></div>
         <button class="theme-btn" onclick="toggleTheme()" id="tBtn">🌙</button>
     </div>
-
     <div id="wotdSection" class="wotd-card">
         <span class="wotd-tag">Word of the Day</span>
         <div class="wotd-word" id="dailyWord">Loading...</div>
         <div class="wotd-hindi" id="dailyHindi">Hindi meaning...</div>
     </div>
-
     <div class="search-box">
         <input type="text" id="sInput" placeholder="Type a word & press Enter..." onkeypress="handleEnter(event)" oninput="checkEmpty()">
     </div>
-
     <div id="resultArea" class="result-container">
         <div class="main-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -54,7 +45,7 @@
                 <button onclick="speak()" style="background:var(--accent); color:white; border:none; padding:10px 15px; border-radius:12px; cursor:pointer;">🔊</button>
             </div>
             <div style="margin-top:20px;">
-                <span class="label">Hindi Meaning</span>
+                <span class="label">Hindi Meanings</span>
                 <div id="hText" class="hindi-meaning">...</div>
             </div>
             <div style="margin-top:20px;">
@@ -80,7 +71,7 @@
 
     async function loadWordOfTheDay() {
         const word = wordsList[new Date().getDate() % wordsList.length];
-        const hText = await getHindiMeaning(word);
+        const hText = await getMultipleHindiMeanings(word);
         document.getElementById('dailyWord').innerText = word;
         document.getElementById('dailyHindi').innerText = hText;
     }
@@ -91,9 +82,9 @@
             if (word) {
                 document.getElementById('resultArea').style.display = 'block';
                 document.getElementById('targetWord').innerText = word;
-                document.getElementById('hText').innerText = "Translating...";
+                document.getElementById('hText').innerText = "Fetching accurate meanings...";
                 
-                const hText = await getHindiMeaning(word);
+                const hText = await getMultipleHindiMeanings(word);
                 document.getElementById('hText').innerText = hText;
 
                 const eRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
@@ -103,14 +94,34 @@
         }
     }
 
-    async function getHindiMeaning(word) {
+    async function getMultipleHindiMeanings(word) {
         try {
-            // Google Translate Mirror for High Accuracy
-            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${encodeURI(word)}`);
+            // Fetching multiple translations using Google mirror
+            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&dt=at&q=${encodeURI(word)}`);
             const data = await res.json();
-            return data[0][0][0];
+            
+            let meanings = [];
+            
+            // Primary meaning
+            if (data[0] && data[0][0] && data[0][0][0]) {
+                meanings.push(data[0][0][0]);
+            }
+            
+            // Additional alternative meanings (Synonyms)
+            if (data[5] && data[5][0] && data[5][0][2]) {
+                const extra = data[5][0][2].slice(0, 2); // Get next 2 synonyms
+                extra.forEach(item => {
+                    if (!meanings.includes(item[0])) meanings.push(item[0]);
+                });
+            }
+
+            // Cleanup: Agar meanings mein English word hi aa gaya hai toh use remove karein
+            const filtered = meanings.filter(m => m.toLowerCase() !== word.toLowerCase());
+            
+            return filtered.length > 0 ? filtered.join(' | ') : "Translation not found";
+            
         } catch (e) {
-            return "Translation Error";
+            return "Error fetching meanings";
         }
     }
 
