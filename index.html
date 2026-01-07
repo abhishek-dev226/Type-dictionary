@@ -3,44 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abhishek's English-Hindi Dictionary</title>
+    <title>Abhishek's Pro Dictionary</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 20px; transition: 0.3s; }
         body.dark-theme { background-color: #121212; color: #e0e0e0; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; position: relative; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
         body.dark-theme .container { background: #1e1e1e; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h1 { color: #333; }
-        body.dark-theme h1 { color: #bb86fc; }
-        input { width: 90%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; outline: none; }
+        input { width: 90%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; margin-bottom: 20px; }
         body.dark-theme input { background: #2d2d2d; border-color: #444; color: #fff; }
-        #result { margin-top: 30px; text-align: left; min-height: 100px; }
-        .word-title { font-size: 24px; font-weight: bold; color: #007bff; display: flex; align-items: center; justify-content: space-between; }
-        .eng-def { color: #555; font-style: italic; margin-top: 10px; border-left: 3px solid #eee; padding-left: 10px; }
-        body.dark-theme .eng-def { color: #bbb; border-left-color: #333; }
-        .hindi-def { font-size: 22px; color: #d9534f; margin-top: 10px; font-weight: bold; }
-        .theme-btn { margin-bottom: 10px; padding: 8px 15px; cursor: pointer; border-radius: 20px; border: 1px solid #ddd; }
-        .speaker-btn { background: none; border: none; cursor: pointer; font-size: 24px; }
+        #result { text-align: left; }
+        .word-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .word-text { font-size: 28px; font-weight: bold; color: #007bff; text-transform: capitalize; }
+        .meaning-box { margin-top: 15px; padding: 10px; border-radius: 8px; background: #f9f9f9; }
+        body.dark-theme .meaning-box { background: #252525; }
+        .label { font-weight: bold; color: #555; font-size: 14px; display: block; margin-bottom: 5px; }
+        .eng-meaning { font-size: 18px; color: #333; margin-bottom: 15px; line-height: 1.4; }
+        body.dark-theme .eng-meaning { color: #ccc; }
+        .hindi-meaning { font-size: 22px; color: #d9534f; font-weight: bold; }
+        .speaker-btn { background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙 Dark Mode</button>
-
 <div class="container">
-    <h1>Word Finder</h1>
-    <p id="status" style="font-size: 12px; color: green;">Loading dictionary...</p>
-    <input type="text" id="searchBox" placeholder="Type a word (e.g. apple)..." onkeyup="searchWord()">
+    <h1 id="main-title">English-Hindi Pro</h1>
+    <p id="status" style="color: orange;">Loading 1.7 Lakh Words...</p>
+    <input type="text" id="searchBox" placeholder="Search any word..." onkeyup="searchWord()">
     
-    <div id="result">
-        <p style="color: #999;">Search results will appear here...</p>
-    </div>
+    <div id="result"></div>
 </div>
 
 <script>
     let dictionary = {};
 
-    // 1. Load the CSV file directly
+    // CSV Load Function
     function loadDictionary() {
         Papa.parse("English-Hindi Dictionary.csv", {
             download: true,
@@ -48,68 +45,47 @@
             complete: function(results) {
                 results.data.forEach(row => {
                     if(row.eword) {
-                        // Creating the English-English-Hindi structure
                         dictionary[row.eword.toLowerCase().trim()] = {
-                            h: row.hword,
-                            g: row.egrammar || "Word"
+                            h: row.hword,      // Hindi Meaning
+                            e: row.egrammar   // English Definition/Grammar
                         };
                     }
                 });
-                document.getElementById("status").innerText = "✅ Dictionary Ready (" + results.data.length + " words)";
+                document.getElementById("status").innerText = "✅ " + Object.keys(dictionary).length + " Words Ready!";
+                document.getElementById("status").style.color = "green";
             }
         });
     }
 
-    // 2. Search Function
     function searchWord() {
         let word = document.getElementById("searchBox").value.toLowerCase().trim();
         let display = document.getElementById("result");
         
         if (dictionary[word]) {
             display.innerHTML = `
-                <div class="word-title">
-                    ${word} 
-                    <button class="speaker-btn" onclick="speak('${word}')">🔊</button>
+                <div class="word-header">
+                    <span class="word-text">${word}</span>
+                    <button class="speaker-btn" onclick="speak('${word}')">🔊 Listen</button>
                 </div>
-                <div class="eng-def"><strong>Grammar:</strong> ${dictionary[word].g}</div>
-                <div class="hindi-def"><strong>Hindi:</strong> ${dictionary[word].h}</div>
+                <div class="meaning-box">
+                    <span class="label">ENGLISH DEFINITION:</span>
+                    <div class="eng-meaning">${dictionary[word].e || 'Definition not available'}</div>
+                    
+                    <span class="label">HINDI MEANING:</span>
+                    <div class="hindi-meaning">${dictionary[word].h}</div>
+                </div>
             `;
-        } else if (word === "") {
-            display.innerHTML = '<p style="color: #999;">Search results will appear here...</p>';
         } else {
-            display.innerHTML = '<p style="color: #999;">Searching in 1.7 Lakh words...</p>';
+            display.innerHTML = word === "" ? "" : "<p style='color:gray;'>Word not found in database...</p>";
         }
     }
 
-    // 3. Voice Function
     function speak(word) {
         const utterance = new SpeechSynthesisUtterance(word);
-        utterance.lang = 'en-US';
         window.speechSynthesis.speak(utterance);
     }
 
-    // 4. Dark Mode Function
-    function toggleTheme() {
-        document.body.classList.toggle("dark-theme");
-        const btn = document.getElementById("themeBtn");
-        if (document.body.classList.contains("dark-theme")) {
-            localStorage.setItem("theme", "dark");
-            btn.innerHTML = "☀️ Light Mode";
-        } else {
-            localStorage.setItem("theme", "light");
-            btn.innerHTML = "🌙 Dark Mode";
-        }
-    }
-
-    // Initialize
-    window.onload = function() {
-        if (localStorage.getItem("theme") === "dark") {
-            document.body.classList.add("dark-theme");
-            document.getElementById("themeBtn").innerHTML = "☀️ Light Mode";
-        }
-        loadDictionary();
-    };
+    window.onload = loadDictionary;
 </script>
-
 </body>
 </html>
