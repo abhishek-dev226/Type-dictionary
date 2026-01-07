@@ -6,24 +6,41 @@
     <title>LexicoGraph Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --accent: #6366f1; --sub: #64748b; }
-        .dark-theme { --bg: #020617; --card: #0f172a; --text: #f8fafc; --accent: #818cf8; --sub: #94a3b8; }
+        :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --accent: #6366f1; --sub: #64748b; --border: #e2e8f0; }
+        .dark-theme { --bg: #020617; --card: #0f172a; --text: #f8fafc; --accent: #818cf8; --sub: #94a3b8; --border: #1e293b; }
+        
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); transition: 0.5s; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
         .nav { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .logo { font-size: 24px; font-weight: 800; } .logo span { color: var(--accent); }
-        .theme-btn { background: var(--card); border: 1px solid #ddd; width: 45px; height: 45px; border-radius: 12px; cursor: pointer; font-size: 20px; }
+        .theme-btn { background: var(--card); border: 1px solid var(--border); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; font-size: 20px; color: var(--text); }
         
-        /* Word of the Day Style */
-        .wotd-card { width: 100%; max-width: 500px; background: linear-gradient(135deg, #6366f1, #4338ca); color: white; padding: 25px; border-radius: 25px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2); box-sizing: border-box; }
-        .wotd-tag { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-        .wotd-word { font-size: 30px; font-weight: 800; margin: 10px 0; text-transform: capitalize; }
-        .wotd-hindi { font-size: 20px; font-weight: 600; color: #fbbf24; margin-bottom: 5px; }
+        /* Minimalist Word of the Day (No Color) */
+        .wotd-card { 
+            width: 100%; max-width: 500px; 
+            background: var(--card); 
+            color: var(--text); 
+            padding: 20px; 
+            border-radius: 20px; 
+            margin-bottom: 25px; 
+            border: 1.5px solid var(--border);
+            box-sizing: border-box; 
+        }
+        .wotd-tag { color: var(--accent); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .wotd-word { font-size: 28px; font-weight: 800; margin: 5px 0; text-transform: capitalize; }
+        .wotd-hindi { font-size: 18px; font-weight: 600; color: #ef4444; margin-bottom: 5px; }
 
         .search-box { width: 100%; max-width: 500px; position: sticky; top: 15px; z-index: 100; }
-        input { width: 100%; padding: 18px 25px; border-radius: 20px; border: 1px solid #e2e8f0; background: var(--card); color: var(--text); font-size: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); outline: none; box-sizing: border-box; }
+        input { 
+            width: 100%; padding: 18px 25px; border-radius: 20px; 
+            border: 1.5px solid var(--border); background: var(--card); 
+            color: var(--text); font-size: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            outline: none; box-sizing: border-box; transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); }
         
         .result-container { width: 100%; max-width: 500px; margin-top: 25px; display: none; }
-        .main-card { background: var(--card); padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); }
+        .main-card { background: var(--card); padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1.5px solid var(--border); }
         .hindi-meaning { font-size: 26px; font-weight: 700; color: #ef4444; margin: 10px 0; }
         .label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
     </style>
@@ -36,19 +53,21 @@
     </div>
 
     <div id="wotdSection" class="wotd-card">
-        <span class="wotd-tag">Daily Pick</span>
+        <span class="wotd-tag">Word of the Day</span>
         <div class="wotd-word" id="dailyWord">Loading...</div>
         <div class="wotd-hindi" id="dailyHindi">Hindi meaning...</div>
     </div>
 
     <div class="search-box">
-        <input type="text" id="sInput" placeholder="Press Enter to search..." onkeypress="handleEnter(event)">
+        <input type="text" id="sInput" placeholder="Press Enter to search..." 
+               onkeypress="handleEnter(event)" 
+               oninput="checkEmpty()">
     </div>
 
     <div id="resultArea" class="result-container">
         <div class="main-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div id="targetWord" style="font-size:32px; font-weight:800;">Word</div>
+                <div id="targetWord" style="font-size:32px; font-weight:800; text-transform: capitalize;">Word</div>
                 <button onclick="speak()" style="background:var(--accent); color:white; border:none; padding:10px 15px; border-radius:12px; cursor:pointer;">🔊</button>
             </div>
             <div style="margin-top:20px;">
@@ -63,19 +82,26 @@
     </div>
 
 <script>
-    const wordsList = ["Resilient", "Eloquent", "Grateful", "Tenacious", "Vibrant", "Compassion"];
+    const wordsList = ["Resilient", "Eloquent", "Grateful", "Tenacious", "Vibrant", "Compassion", "Abundant"];
 
     async function initApp() {
         if (localStorage.getItem('theme') === 'dark') toggleTheme();
         loadWordOfTheDay();
     }
 
+    // Function to hide result when search box is cleared
+    function checkEmpty() {
+        const val = document.getElementById('sInput').value;
+        if (val === "") {
+            document.getElementById('resultArea').style.display = 'none';
+        }
+    }
+
     async function loadWordOfTheDay() {
         const word = wordsList[new Date().getDate() % wordsList.length];
-        const hRes = await fetch(`https://api.mymemory.translated.net/get?q=${word}&langpair=en|hi`);
-        const hData = await hRes.json();
+        const hText = await getHindiMeaning(word);
         document.getElementById('dailyWord').innerText = word;
-        document.getElementById('dailyHindi').innerText = hData.responseData.translatedText;
+        document.getElementById('dailyHindi').innerText = hText;
     }
 
     async function handleEnter(e) {
@@ -84,17 +110,30 @@
             if (word) {
                 document.getElementById('resultArea').style.display = 'block';
                 document.getElementById('targetWord').innerText = word;
-                
-                // Fetch Hindi
-                const hRes = await fetch(`https://api.mymemory.translated.net/get?q=${word}&langpair=en|hi`);
-                const hData = await hRes.json();
-                document.getElementById('hText').innerText = hData.responseData.translatedText;
+                document.getElementById('hText').innerText = "Translating...";
 
-                // Fetch English
+                const hText = await getHindiMeaning(word);
+                document.getElementById('hText').innerText = hText;
+
                 const eRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 const eData = await eRes.json();
                 document.getElementById('eDef').innerText = eData[0] ? eData[0].meanings[0].definitions[0].definition : "Not found";
             }
+        }
+    }
+
+    async function getHindiMeaning(word) {
+        try {
+            const res = await fetch(`https://api.mymemory.translated.net/get?q=${word}&langpair=en|hi&de=abhishek@lexicograph.com`);
+            const data = await res.json();
+            let translation = data.responseData.translatedText;
+
+            if (translation.toLowerCase() === word.toLowerCase() && data.matches.length > 1) {
+                translation = data.matches[1].translation;
+            }
+            return translation;
+        } catch (e) {
+            return "Translation Error";
         }
     }
 
