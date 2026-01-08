@@ -3,80 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LexicoGraph Pro</title>
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#6366f1">
+    <title>LexicoGraph Pro | A1 Quality</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --accent: #6366f1; --sub: #64748b; --border: #e2e8f0; }
-        .dark-theme { --bg: #020617; --card: #0f172a; --text: #f8fafc; --accent: #818cf8; --sub: #94a3b8; --border: #1e293b; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); transition: 0.5s; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        :root { --bg: #020617; --card: #0f172a; --text: #f8fafc; --accent: #38bdf8; --sub: #94a3b8; --border: #1e293b; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .nav { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .logo { font-size: 24px; font-weight: 800; } .logo span { color: var(--accent); }
-        .theme-btn { background: var(--card); border: 1px solid var(--border); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; font-size: 20px; color: var(--text); }
-        .wotd-card { width: 100%; max-width: 500px; background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 25px; border: 1.5px solid var(--border); box-sizing: border-box; }
+        .wotd-card { width: 100%; max-width: 500px; background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 25px; border: 1px solid var(--border); box-sizing: border-box; }
         .wotd-tag { color: var(--accent); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .wotd-word { font-size: 28px; font-weight: 800; margin: 5px 0; text-transform: capitalize; }
-        .wotd-hindi { font-size: 18px; font-weight: 600; color: #ef4444; }
         .search-box { width: 100%; max-width: 500px; position: sticky; top: 15px; z-index: 100; }
-        input { width: 100%; padding: 18px 25px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); outline: none; box-sizing: border-box; transition: 0.3s; }
-        input:focus { border-color: var(--accent); }
+        input { width: 100%; padding: 18px 25px; border-radius: 20px; border: 2px solid var(--border); background: var(--card); color: var(--text); font-size: 18px; outline: none; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
         .result-container { width: 100%; max-width: 500px; margin-top: 25px; display: none; }
-        .main-card { background: var(--card); padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1.5px solid var(--border); }
-        .hindi-meaning { font-size: 24px; font-weight: 700; color: #ef4444; margin: 8px 0; line-height: 1.4; }
-        .label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; display: block; margin-top: 18px; }
-        .example-box { font-size: 15px; background: rgba(99, 102, 241, 0.05); padding: 15px; border-radius: 15px; margin-top: 5px; color: var(--text); font-style: italic; border-left: 4px solid var(--accent); }
-        .pronounce { font-size: 16px; color: var(--sub); font-weight: 600; display: inline-block; margin-left: 10px; vertical-align: middle; }
-        .pos-tag { font-size: 12px; background: var(--accent); color: white; padding: 2px 10px; border-radius: 6px; font-weight: bold; margin-top: 10px; display: inline-block; }
-        .chip { display: inline-block; background: var(--border); padding: 4px 12px; border-radius: 10px; font-size: 13px; margin: 4px; color: var(--text); font-weight: 500; }
-        .ant-chip { background: #fee2e2; color: #991b1b; }
+        .main-card { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid var(--border); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .word-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .word-title { font-size: 36px; font-weight: 800; text-transform: capitalize; margin: 0; }
+        .pronounce { font-size: 18px; color: var(--accent); font-family: monospace; margin-top: 5px; }
+        .pos-badge { font-size: 12px; background: rgba(56, 189, 248, 0.1); color: var(--accent); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--accent); font-weight: 700; margin-top: 15px; display: inline-block; }
+        .section-label { font-size: 11px; font-weight: 800; color: var(--sub); text-transform: uppercase; letter-spacing: 2px; margin: 25px 0 10px 0; display: block; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        .h-meaning { font-size: 24px; font-weight: 700; color: #fb7185; line-height: 1.4; }
+        .h-example { font-size: 15px; color: var(--text); font-style: italic; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border-left: 4px solid #fb7185; margin-top: 10px; }
+        .e-def { font-size: 16px; line-height: 1.6; color: #cbd5e1; }
+        .spk-btn { background: var(--accent); border: none; width: 50px; height: 50px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .spk-btn:active { transform: scale(0.9); }
     </style>
 </head>
 <body onload="initApp()">
-    <div class="nav">
-        <div class="logo">Lexico<span>Graph</span></div>
-        <button class="theme-btn" onclick="toggleTheme()" id="tBtn">🌙</button>
+    <div class="nav"><div class="logo">Lexico<span>Graph</span></div></div>
+
+    <div id="wotdSection" class="wotd-card">
+        <span class="wotd-tag">Daily Learning</span>
+        <div id="dailyWord" style="font-size:24px; font-weight:800; margin-top:5px;">...</div>
+        <div id="dailyHindi" style="font-size:18px; color:#fb7185; font-weight:600;">...</div>
     </div>
 
-    <div id="wotdSection" class="wotd-card"><span class="wotd-tag">Daily Pick</span><div class="wotd-word" id="dailyWord">Loading...</div><div class="wotd-hindi" id="dailyHindi">...</div></div>
-    <div class="search-box"><input type="text" id="sInput" placeholder="Enter any word in the world..." onkeypress="handleEnter(event)" oninput="checkEmpty()"></div>
+    <div class="search-box"><input type="text" id="sInput" placeholder="Search world's best meanings..." onkeypress="handleEnter(event)" oninput="checkEmpty()"></div>
 
     <div id="resultArea" class="result-container">
         <div class="main-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="word-header">
                 <div>
-                    <span id="targetWord" style="font-size:32px; font-weight:800; text-transform: capitalize;">Word</span>
-                    <span id="pText" class="pronounce">/loading/</span>
+                    <h1 class="word-title" id="targetWord">Word</h1>
+                    <div id="pText" class="pronounce">\ˈloading\</div>
                 </div>
-                <button onclick="speak()" style="background:var(--accent); color:white; border:none; padding:12px; border-radius:15px; cursor:pointer; width:50px; height:50px;">🔊</button>
-            </div>
-            
-            <div id="posSection"><span id="posLabel" class="pos-tag">Noun</span></div>
-
-            <span class="label">Hindi Meanings</span>
-            <div id="hText" class="hindi-meaning">...</div>
-
-            <div id="exampleSection">
-                <span class="label">Hindi Usage Example</span>
-                <div id="hEx" class="example-box">...</div>
+                <button class="spk-btn" onclick="speak()">🔊</button>
             </div>
 
-            <span class="label">English Definition</span>
-            <div id="eDef" style="font-size:16px; margin-top:5px; line-height:1.5;">...</div>
+            <div id="posLabel" class="pos-badge">PART OF SPEECH</div>
 
-            <div id="grammarSection">
-                <span class="label">Synonyms & Antonyms</span>
-                <div id="synBox" style="margin-top:8px;"></div>
+            <span class="section-label">Hindi Meanings</span>
+            <div id="hText" class="h-meaning">...</div>
+
+            <div id="hExContainer">
+                <span class="section-label">Hindi Usage Example</span>
+                <div id="hEx" class="h-example">...</div>
             </div>
+
+            <span class="section-label">Full English Definition</span>
+            <div id="eDef" class="e-def">...</div>
         </div>
     </div>
 
 <script>
     const wordsList = ["Resilient", "Eloquent", "Grateful", "Tenacious", "Vibrant", "Compassion", "Abundant"];
-    async function initApp() { if (localStorage.getItem('theme') === 'dark') toggleTheme(); loadWordOfTheDay(); }
+
+    async function initApp() { loadWordOfTheDay(); }
     function checkEmpty() { if (document.getElementById('sInput').value === "") document.getElementById('resultArea').style.display = 'none'; }
-    
+
     async function loadWordOfTheDay() {
         const word = wordsList[new Date().getDate() % wordsList.length];
         const hText = await getUniqueHindiMeanings(word);
@@ -87,51 +81,43 @@
     async function handleEnter(e) {
         if (e.key === 'Enter') {
             const word = document.getElementById('sInput').value.trim();
-            if (word) {
-                const resArea = document.getElementById('resultArea');
-                resArea.style.display = 'block';
-                document.getElementById('targetWord').innerText = word;
-                document.getElementById('hText').innerText = "Diving deep into database...";
+            if (!word) return;
 
-                // API Calls
-                const hMeanings = await getUniqueHindiMeanings(word);
-                document.getElementById('hText').innerText = hMeanings;
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('targetWord').innerText = word;
+            document.getElementById('hText').innerText = "Processing A1 Accuracy...";
 
-                try {
-                    const eRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                    const eData = await eRes.json();
+            const hMeanings = await getUniqueHindiMeanings(word);
+            document.getElementById('hText').innerText = hMeanings;
+
+            try {
+                const eRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                const eData = await eRes.json();
+                
+                if(eData[0]) {
+                    const data = eData[0];
+                    // Improved Pronunciation Logic
+                    document.getElementById('pText').innerText = `\\${data.phonetic || data.phonetics.find(p => p.text)?.text || "..."}\\`;
+                    document.getElementById('posLabel').innerText = data.meanings[0].partOfSpeech.toUpperCase();
                     
-                    if(eData[0]) {
-                        const data = eData[0];
-                        document.getElementById('pText').innerText = data.phonetic || data.phonetics.find(p => p.text)?.text || "/.../";
-                        document.getElementById('posLabel').innerText = data.meanings[0].partOfSpeech;
-                        document.getElementById('eDef').innerText = data.meanings[0].definitions[0].definition;
-                        
-                        // Synonyms & Antonyms
-                        let syns = data.meanings[0].synonyms.slice(0, 3).map(s => `<span class="chip">${s}</span>`).join('');
-                        let ants = data.meanings[0].antonyms.slice(0, 3).map(a => `<span class="chip ant-chip">${a}</span>`).join('');
-                        
-                        if(syns || ants) {
-                            document.getElementById('synBox').innerHTML = syns + ants;
-                            document.getElementById('grammarSection').style.display = 'block';
-                        } else { document.getElementById('grammarSection').style.display = 'none'; }
+                    // Rich Definition
+                    let definitions = data.meanings[0].definitions.map((d, i) => `${i+1}. ${d.definition}`).join('<br><br>');
+                    document.getElementById('eDef').innerHTML = definitions;
 
-                        // Example Translation
-                        const ex = data.meanings[0].definitions[0].example;
-                        if(ex) {
-                            document.getElementById('hEx').innerText = await translateToHindi(ex);
-                            document.getElementById('exampleSection').style.display = 'block';
-                        } else { document.getElementById('exampleSection').style.display = 'none'; }
+                    // Hindi Example Translation
+                    const ex = data.meanings[0].definitions[0].example;
+                    if(ex) {
+                        document.getElementById('hEx').innerText = await translateToHindi(ex);
+                        document.getElementById('hExContainer').style.display = 'block';
                     } else {
-                        // Fallback for Ikigai type words
-                        document.getElementById('pText').innerText = "/Foreign Word/";
-                        document.getElementById('posLabel').innerText = "Vocabulary";
-                        document.getElementById('eDef').innerText = "This word is recognized globally; displaying common translation usage.";
-                        document.getElementById('grammarSection').style.display = 'none';
-                        document.getElementById('exampleSection').style.display = 'none';
+                        document.getElementById('hExContainer').style.display = 'none';
                     }
-                } catch(err) { console.log(err); }
-            }
+                } else {
+                    document.getElementById('pText').innerText = "\\Foreign Origin\\";
+                    document.getElementById('eDef').innerText = "Detailed Webster definition not found. Displaying contextual translation.";
+                    document.getElementById('hExContainer').style.display = 'none';
+                }
+            } catch(err) { console.log(err); }
         }
     }
 
@@ -139,23 +125,19 @@
         try {
             const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&dt=at&q=${encodeURI(word)}`);
             const data = await res.json();
-            let rawMeanings = [];
-            
-            // Primary meaning
-            if (data[0] && data[0][0]) rawMeanings.push(data[0][0][0]);
-            
-            // Extra synonyms from translation data
+            let raw = [];
+            if (data[0] && data[0][0]) raw.push(data[0][0][0]);
             if (data[5] && data[5][0] && data[5][0][2]) {
-                data[5][0][2].forEach(item => rawMeanings.push(item[0]));
+                data[5][0][2].forEach(i => raw.push(i[0]));
             }
 
-            // Remove duplicates and filter out the English word itself
-            let unique = [...new Set(rawMeanings)]
+            // A1 Logic: No repetitions, no English words in Hindi meaning
+            let unique = [...new Set(raw)]
                 .filter(m => m.toLowerCase() !== word.toLowerCase())
-                .slice(0, 3); // Top 3 unique meanings
+                .slice(0, 3);
 
-            return unique.join(' | ') || rawMeanings[0] || "Meaning not found";
-        } catch (e) { return "Error fetching meanings"; }
+            return unique.join(' | ') || raw[0] || "No translation found";
+        } catch (e) { return "Error"; }
     }
 
     async function translateToHindi(text) {
@@ -165,11 +147,6 @@
     }
 
     function speak() { window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('targetWord').innerText)); }
-    function toggleTheme() {
-        document.body.classList.toggle('dark-theme');
-        localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
-        document.getElementById('tBtn').innerText = document.body.classList.contains('dark-theme') ? "☀️" : "🌙";
-    }
 </script>
 </body>
 </html>
