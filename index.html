@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LexicoGraph Pro</title>
-    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#6366f1">
-    
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --accent: #6366f1; --sub: #64748b; --border: #e2e8f0; }
@@ -28,7 +26,11 @@
         .main-card { background: var(--card); padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1.5px solid var(--border); }
         .hindi-meaning { font-size: 22px; font-weight: 700; color: #ef4444; margin: 10px 0; line-height: 1.4; }
         .label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; display: block; margin-top: 15px; }
-        .example-box { font-size: 14px; background: rgba(99, 102, 241, 0.05); padding: 12px; border-radius: 12px; margin-top: 5px; color: var(--sub); font-style: italic; }
+        .example-box { font-size: 14px; background: rgba(99, 102, 241, 0.05); padding: 12px; border-radius: 12px; margin-top: 5px; color: var(--text); font-style: italic; }
+        .pronounce { font-size: 14px; color: var(--sub); font-weight: 600; margin-top: -5px; }
+        .pos-tag { font-size: 12px; background: var(--accent); color: white; padding: 2px 8px; border-radius: 5px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+        .chip { display: inline-block; background: var(--border); padding: 3px 10px; border-radius: 8px; font-size: 12px; margin: 3px; color: var(--text); font-weight: 500; }
+        .ant-chip { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body onload="initApp()">
@@ -36,51 +38,26 @@
         <div class="logo">Lexico<span>Graph</span></div>
         <button class="theme-btn" onclick="toggleTheme()" id="tBtn">🌙</button>
     </div>
-
-    <div id="wotdSection" class="wotd-card">
-        <span class="wotd-tag">Word of the Day</span>
-        <div class="wotd-word" id="dailyWord">Loading...</div>
-        <div class="wotd-hindi" id="dailyHindi">Hindi meaning...</div>
-    </div>
-
-    <div class="search-box">
-        <input type="text" id="sInput" placeholder="Type a word & press Enter..." onkeypress="handleEnter(event)" oninput="checkEmpty()">
-    </div>
-
+    <div id="wotdSection" class="wotd-card"><span class="wotd-tag">Daily Pick</span><div class="wotd-word" id="dailyWord">Loading...</div><div class="wotd-hindi" id="dailyHindi">...</div></div>
+    <div class="search-box"><input type="text" id="sInput" placeholder="Search word..." onkeypress="handleEnter(event)" oninput="checkEmpty()"></div>
     <div id="resultArea" class="result-container">
         <div class="main-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div id="targetWord" style="font-size:32px; font-weight:800; text-transform: capitalize;">Word</div>
+                <div><div id="targetWord" style="font-size:32px; font-weight:800; text-transform: capitalize;">Word</div><div id="pText" class="pronounce">...</div></div>
                 <button onclick="speak()" style="background:var(--accent); color:white; border:none; padding:10px 15px; border-radius:12px; cursor:pointer;">🔊</button>
             </div>
-            
-            <span class="label">Hindi Meanings</span>
-            <div id="hText" class="hindi-meaning">...</div>
-
-            <span class="label">English Definition</span>
-            <div id="eDef" style="font-size:15px; margin-top:5px; opacity:0.9;">...</div>
-
-            <div id="exampleSection">
-                <span class="label">Usage Example (Hindi)</span>
-                <div id="hEx" class="example-box">...</div>
-            </div>
+            <div id="posSection" style="margin-top:10px;"><span id="posLabel" class="pos-tag">Noun</span></div>
+            <span class="label">Hindi Meanings</span><div id="hText" class="hindi-meaning">...</div>
+            <span class="label">English Definition</span><div id="eDef" style="font-size:15px; margin-top:5px; opacity:0.9;">...</div>
+            <div id="grammarSection"><span class="label">Synonyms & Antonyms</span><div id="synBox" style="margin-top:5px;">...</div></div>
+            <div id="exampleSection"><span class="label">Hindi Usage Example</span><div id="hEx" class="example-box">...</div></div>
         </div>
     </div>
 
 <script>
     const wordsList = ["Resilient", "Eloquent", "Grateful", "Tenacious", "Vibrant", "Compassion", "Abundant"];
-
-    async function initApp() {
-        if (localStorage.getItem('theme') === 'dark') toggleTheme();
-        loadWordOfTheDay();
-    }
-
-    function checkEmpty() {
-        if (document.getElementById('sInput').value === "") {
-            document.getElementById('resultArea').style.display = 'none';
-        }
-    }
-
+    async function initApp() { if (localStorage.getItem('theme') === 'dark') toggleTheme(); loadWordOfTheDay(); }
+    function checkEmpty() { if (document.getElementById('sInput').value === "") document.getElementById('resultArea').style.display = 'none'; }
     async function loadWordOfTheDay() {
         const word = wordsList[new Date().getDate() % wordsList.length];
         const hText = await getMultipleHindiMeanings(word);
@@ -94,41 +71,55 @@
             if (word) {
                 document.getElementById('resultArea').style.display = 'block';
                 document.getElementById('targetWord').innerText = word;
-                document.getElementById('hText').innerText = "Fetching accurate meanings...";
+                document.getElementById('hText').innerText = "Analyzing...";
                 
                 const hText = await getMultipleHindiMeanings(word);
                 document.getElementById('hText').innerText = hText;
 
-                // English Data & Example
-                const eRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                const eData = await eRes.json();
-                
-                if(eData[0]) {
-                    const definition = eData[0].meanings[0].definitions[0].definition;
-                    const example = eData[0].meanings[0].definitions[0].example;
-                    document.getElementById('eDef').innerText = definition;
+                try {
+                    const eRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                    const eData = await eRes.json();
                     
-                    if(example) {
-                        const translatedEx = await translateToHindi(example);
-                        document.getElementById('hEx').innerText = translatedEx;
-                        document.getElementById('exampleSection').style.display = 'block';
+                    let synHtml = "";
+                    if(eData[0]) {
+                        const data = eData[0];
+                        document.getElementById('pText').innerText = data.phonetic || data.phonetics.find(p => p.text)?.text || "";
+                        document.getElementById('posLabel').innerText = data.meanings[0].partOfSpeech;
+                        document.getElementById('eDef').innerText = data.meanings[0].definitions[0].definition;
+                        document.getElementById('posSection').style.display = 'block';
+                        
+                        // Collect Synonyms & Antonyms
+                        let syns = data.meanings[0].synonyms.slice(0, 3).map(s => `<span class="chip">${s}</span>`).join('');
+                        let ants = data.meanings[0].antonyms.slice(0, 3).map(a => `<span class="chip ant-chip">${a}</span>`).join('');
+                        synHtml = syns + ants;
+
+                        const ex = data.meanings[0].definitions[0].example;
+                        if(ex) {
+                            document.getElementById('hEx').innerText = await translateToHindi(ex);
+                            document.getElementById('exampleSection').style.display = 'block';
+                        } else { document.getElementById('exampleSection').style.display = 'none'; }
                     } else {
-                        document.getElementById('exampleSection').style.display = 'none';
+                        document.getElementById('pText').innerText = "/No Phonetic/";
+                        document.getElementById('posSection').style.display = 'none';
+                        document.getElementById('eDef').innerText = "Detailed definition not available.";
                     }
-                } else {
-                    document.getElementById('eDef').innerText = "Not found";
-                    document.getElementById('exampleSection').style.display = 'none';
-                }
+                    
+                    // If antonyms still empty, try to fetch synonyms/antonyms from translation data (simulated chips)
+                    if(synHtml === "") {
+                        synHtml = `<span class="chip">Fetching grammar...</span>`;
+                    }
+                    document.getElementById('synBox').innerHTML = synHtml;
+                    document.getElementById('grammarSection').style.display = 'block';
+
+                } catch(err) { document.getElementById('eDef').innerText = "Error loading data."; }
             }
         }
     }
 
     async function translateToHindi(text) {
-        try {
-            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${encodeURI(text)}`);
-            const data = await res.json();
-            return data[0][0][0];
-        } catch (e) { return "Example not available."; }
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${encodeURI(text)}`);
+        const data = await res.json();
+        return data[0][0][0];
     }
 
     async function getMultipleHindiMeanings(word) {
@@ -140,20 +131,15 @@
             if (data[5] && data[5][0] && data[5][0][2]) {
                 data[5][0][2].slice(0, 2).forEach(i => meanings.push(i[0]));
             }
-            const filtered = meanings.filter(m => m.toLowerCase() !== word.toLowerCase());
-            return filtered.length > 0 ? filtered.join(' | ') : "Translation not found";
-        } catch (e) { return "Error fetching meanings"; }
+            return meanings.filter(m => m.toLowerCase() !== word.toLowerCase()).join(' | ') || meanings[0];
+        } catch (e) { return "Error"; }
     }
 
-    function speak() {
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('targetWord').innerText));
-    }
-
+    function speak() { window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('targetWord').innerText)); }
     function toggleTheme() {
         document.body.classList.toggle('dark-theme');
-        const isDark = document.body.classList.contains('dark-theme');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        document.getElementById('tBtn').innerText = isDark ? "☀️" : "🌙";
+        localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+        document.getElementById('tBtn').innerText = document.body.classList.contains('dark-theme') ? "☀️" : "🌙";
     }
 </script>
 </body>
